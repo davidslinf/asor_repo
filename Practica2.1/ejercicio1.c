@@ -1,23 +1,18 @@
-#include<iostream>
-#include <sys/types.h>
-#include <unistd.h>
+#include<stdio.h>
+#include<errno.h>
+#include<string.h>
 
 
-using namespace std;
+int main() {
 
+setuid(0);
+ 
+ 	if(errno != 0) {
+		perror("Se produjo un error");
+		char *strerror(int errnum);
 
-int main(int argc, char **argv) {
-
-        int result = setuid(0);
-
-        if(result == -1) {
-
-                cout << "No se ha podido establecer el id.";
-                return -1;
-        }
-
-        else
-        cout << "Nuevo id establecido.";
-
-        return 0;
+ 		return -1;
+ 	}   
+	return 0;
 }
+
