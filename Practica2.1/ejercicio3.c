@@ -9,7 +9,6 @@ int main() {
 
 	for(errno; errno < 256; errno++) {
 		perror("Error");
-		//char *strerror(int errnum = error);
 	}
 	
 	return 0;
