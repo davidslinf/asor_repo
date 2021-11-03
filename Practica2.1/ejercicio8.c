@@ -8,10 +8,10 @@
 int main(int argv, char **argc){
 	
 	uid_t uidReal = getuid();
-    uid_t uidEffectivo = geteuid();
+    uid_t uidEfectivo = geteuid();
     
     printf("UID REAL %i\n",uidReal);
-    printf("UID EFECTIVO %i\n",uidEffectivo);
+    printf("UID EFECTIVO %i\n",uidEfectivo);
     
     return 0;
 }
