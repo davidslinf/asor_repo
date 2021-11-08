@@ -1,9 +1,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include<stdio.h>
-#include<string.h>
-#include<errno.h>
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
 
 int main(int argv, char **argc) {
 
