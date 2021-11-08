@@ -7,7 +7,7 @@
 
 int main(int argv, char **argc) {
 
-	mode_t mascara = umask(027);
+	umask(027);
 
 	int fd= open("Prueba.txt",O_CREAT|O_RDWR|O_TRUNC, 0645);
 
