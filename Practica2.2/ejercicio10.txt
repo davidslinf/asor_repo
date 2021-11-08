@@ -22,4 +22,4 @@ Los enlaces simbólicos no salen reflejados en el contador de enlaces ya que tie
 sobbre el fichero original.
 
 Si borramos el fichero original en el enlace rígido se decrementaria en uno el número de enlaces. Por su parte en el enlace simbólico si se borra el fichero original
-quedaria como un archivo inutil que apuntaria a un nodo inexistente.
+quedaria como un archivo inutil que apuntaria a un nodo inexistente. (Enlace roto)
