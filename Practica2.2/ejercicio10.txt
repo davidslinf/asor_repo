@@ -19,7 +19,7 @@ El i-Nodo y los permisos del fichero original y del enlace simbólico son distin
 
 Los enlaces rígidos aumentan el contador de enlaces, luego si se borra un enlace rígido el contador decrementará.
 Los enlaces simbólicos no salen reflejados en el contador de enlaces ya que tienen un i-Nodo distinto, por lo que si se borra no tendría consecuencias
-sobbre el fichero original.
+sobre el fichero original.
 
-Si borramos el fichero original en el enlace rígido se decrementaria en uno el número de enlaces. Por su parte en el enlace simbólico si se borra el fichero original
+Si borramos el fichero original, en el enlace rígido se decrementaria en uno el número de enlaces, por su parte el enlace simbólico
 quedaria como un archivo inutil que apuntaria a una ruta inexistente. (Enlace roto)
