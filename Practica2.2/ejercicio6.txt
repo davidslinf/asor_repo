@@ -1,0 +1,12 @@
+Cuando se crea un fichero, los permisos por defecto se derivan de la máscara de usuario (umask).
+El comando interno de la shell umask permite consultar y fijar esta máscara. Usando este comando, fijar
+la máscara de umask 027 que los nuevos ficheros no tengan permiso de escritura para el grupo y ningún permiso para otros.
+Comprobar el funcionamiento con los comandos touch, mkdir y ls.
+
+umask 027
+touch prueba1.txt
+mkdir prueba2
+ls -l
+drwxr-x---  2 root root    6 Nov  8 09:53 prueba2
+-rw-r-----  1 root root    0 Nov  8 09:53 prueba1.txt
+
