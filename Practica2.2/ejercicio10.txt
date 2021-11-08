@@ -1,0 +1,25 @@
+Creamos el fichero
+touch prueba
+
+Enlace simbólico
+ln -s prueba pruebaEnlace
+
+Enlace rígido
+ln prueba pruebaRigido
+
+Vemos los i-nodos y los permisos de cada uno
+ls -l
+
+-rw-r--r-- 2 usuario usuario    0 nov  8 20:06 prueba
+lrwxrwxrwx 1 usuario usuario    6 nov  8 20:08 pruebaEnlace -> prueba
+-rw-r--r-- 2 usuario usuario    0 nov  8 20:06 pruebaRigido
+
+El i-Nodo y los permisos del fichero original y del enlace rigido son los mismos.
+El i-Nodo y los permisos del fichero original y del enlace simbólico son distintos.
+
+Los enlaces rígidos aumentan el contador de enlaces, luego si se borra un enlace rígido el contador decrementará.
+Los enlaces simbólicos no salen reflejados en el contador de enlaces ya que tienen un i_Nodo distinto, por lo que si se borra no tendría consecuencias
+sobbre el fichero original.
+
+Si borramos el fichero original en el enlace rígido se decrementaria en uno el número de enlaces. Por su parte en el enlace simbólico si se borra el fichero original
+quedaria como un archivo inutil que apuntaria a un nodo inexistente.
