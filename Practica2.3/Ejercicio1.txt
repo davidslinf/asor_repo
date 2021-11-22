@@ -1,0 +1,5 @@
+Cambiar prioridad de la shell a -10
+sudo renice -10 2356
+
+Cambiar prioridad de la shell a 12 y planificación a SCHED_FIFO
+sudo chrt -f -p 12 2356
