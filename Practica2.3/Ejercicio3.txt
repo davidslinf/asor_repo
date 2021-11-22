@@ -1,0 +1,3 @@
+Nos sale:
+Politica de planificacion: SCHED_FIFO, Prioridad: 12
+Prioridad minima: 1, Prioridad maxima: 99
