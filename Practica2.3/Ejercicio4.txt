@@ -1,0 +1,9 @@
+ps -o pid,ppid,pgid,sid,comm -s 2356
+  PID  PPID  PGID   SID COMMAND
+ 2356  2354  2356  2356 bash
+ 2397  2356  2397  2356 man
+ 2406  2397  2397  2356 pager
+ 3564  2356  3564  2356 ps
+
+El PPID del proceso creado en la shell es el mismo que el PID de la shell y ambos comparten el SID.
+Cuando se crea un nuevo proceso, su identificador de grupo de procesos (PGID) es su propio PID.
