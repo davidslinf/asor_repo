@@ -32,6 +32,8 @@ void MostrarAtributos() {
         printf("El numero maximo de ficheros es: %i\n" , MaxFicheros);
         if(DirActual == NULL) perror("No hay suficiente espacio en el buffer para la ruta\n");
         else printf("El directorio de trabajo actual es: %s\n", DirActual);
+        
+        free(DirActual);
 
         return;
 }
