@@ -20,14 +20,15 @@ int main(int argc, char** argv) {
 
         char* DirActual = malloc(PATH_MAX);
         getcwd(DirActual, PATH_MAX);
-        if(DirActual == NULL) perror("No hay suficiente espacio en el buffer para la ruta\n");
+        
 
         printf("El PID es: %i\n", ProcesoID);
         printf("El PPID es: %i\n", PadreID);
         printf("El PGID es: %i\n", GrupoID);
         printf("El SID es: %i\n", SesionID);
         printf("El numero maximo de ficheros es: %i\n" , MaxFicheros);
-        printf("El directorio de trabajo actual es: %s\n", DirActual);
+        if(DirActual == NULL) perror("No hay suficiente espacio en el buffer para la ruta\n");
+        else printf("El directorio de trabajo actual es: %s\n", DirActual);
 
         return 0;
 }
