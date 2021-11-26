@@ -73,8 +73,8 @@ int main(int argc, char** argv) {
                         return -1;
                 }
 				
-				if(execvp(argv[1],&argv[2]) == -1) {
-                        perror("Error en execvp()\n");
+		if(execvp(argv[1],&argv[2]) == -1) {
+                      	perror("Error en execvp()\n");
                         return -1;
                 }
                 printf("Comando execvp() ejecutado correctamente\n");
