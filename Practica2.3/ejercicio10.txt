@@ -1,0 +1,19 @@
+$ sleep 600
+Killed
+
+$ sleep 600
+User defined signal 1
+
+$ sleep 600
+Alarm clock
+
+$ sleep 600
+Quit
+
+$ sleep 600
+CPU time limit exceeded
+
+$ sleep 600
+Hangup
+
+Se puede observar que la salida explica el motivo por el que se ha acabado o detenido el proceso y que a su vez está relacionado con el tipo de señal enviado.
