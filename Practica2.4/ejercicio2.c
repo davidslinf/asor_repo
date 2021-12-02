@@ -57,7 +57,7 @@ int main(int argc, char** argv) {
                         read(h_p[0], mensRecibido, sizeof(mensRecibido));
                         printf("Se ha recibido el caracter %s del hijo\n", mensRecibido);
                 }
-                wait(NULL)
+                wait(NULL);
                 close(h_p[0]);
                 close(p_h[1]);
                 printf("El padre ha acabado\n");
