@@ -1,0 +1,29 @@
+$ mkfifo tuberia
+
+/** Información sobre la tubería con nombre **/
+
+$ stat tuberia
+  Fichero: «tuberia»
+  Tamaño: 0         	Bloques: 0          Bloque E/S: 4096   `fifo'
+Dispositivo: 801h/2049d	Nodo-i: 137482      Enlaces: 1
+Acceso: (0644/prw-r--r--)  Uid: ( 1001/   usuario)   Gid: ( 1001/   usuario)
+      Acceso: 2021-11-30 19:55:48.031716430 +0100
+Modificación: 2021-11-30 19:55:48.031716430 +0100
+      Cambio: 2021-11-30 19:55:48.031716430 +0100
+    Creación: -
+
+$ ls
+ practica2.1  practica2.2  practica2.3	practica2.4 tuberia
+
+Se puede observar que se añade como fichero y que es un tipo de fichero especial, denominado fifo. No tiene ningún tipo de contenido
+pero es accesible mediante el sistema de ficheros.
+
+/** Uso de la tubería con nombre **/
+
+$ echo 12345 > tuberia
+$ cat < tuberia
+12345
+
+$ echo esto es una prueba > tuberia
+$ tee < tuberia
+esto es una prueba
