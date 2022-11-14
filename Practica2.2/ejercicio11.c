@@ -8,29 +8,31 @@
 
 int main(int argc, char **argv) {
 
-        if(argc == 2) {
-                if(argc == 2){
-                struc stat buf;
+        if(argc == 2){
+                struct stat buf;
                 stat(argv[1], &buf);
-                if(buf.st_mode == ISREG){
-                        const char * Nombre =  argv[1];
-                        const char * TerminacionRig = ".hard";
-                        const char * TerminacionSim = ".sym";
+                if(buf.st_mode == "S_ISREG"){
+                        const char *Nombre = argv[1];
+                        const char *TermRig = ".hard";
+                        const char *TermSim = ".sym";
 
-                        char * NombreRigido = malloc(strlen(Nombre) + strlen(TerminacionRig) +1);
-                        char * NombreSimbolico = malloc(strlen(Nombre) + strlen(TerminacionSim) +1);
+                        char *NombreRig = malloc(strlen(Nombre) + strlen(TermRig) +1);
+                        char *NombreSim = malloc(strlen(Nombre) + strlen(TermSim) +1);
 
-                        strcat(strcpy(NombreRigido, Nombre), TerminacionRig);
-                        strcat(strcpy(NombreSimbolico, Nombre), TerminacionSim);
+                        strcat(strcpy(NombreRig, Nombre),TermRig);
+                        strcat(strcpy(NombreSim, Nombre),TermSim);
 
-                        link(Nombre, NombreRigido);
-                        symlink(Nombre, NombreSimbolico);
+                        link(Nombre, NombreRig);
+                        symlink(Nombre, NombreSim);
 
-                        free(NombreRigido);
-                        free(NombreSimbolico);
+                        free(NombreRig);
+                        free(NombreSim);
                 }
                 else{
                         perror("No es un fichero regular\n");
+                        return -1;
+                }
+
 
         }
 
