@@ -15,6 +15,8 @@ int main(int argc, char** argv) {
 
                 printf("Prueba de escritura con saldida por pantalla.");
                 dup2(fd,1);
+                printf("Prueba de escritura con saldida por fichero.");
+
 
                 return 0;
         }
