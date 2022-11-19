@@ -1,3 +1,37 @@
 Nos sale:
 Politica de planificacion: SCHED_FIFO, Prioridad: 12
 Prioridad minima: 1, Prioridad maxima: 99
+
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
+#include <sched.h>
+#include <sys/time.h>
+#include <sys/resource.h>
+
+int main(int argc, char **argv){
+
+        struct sched_param p;
+
+        setpriority(PRIO_PROCESS, 0, 12);
+        sched_setscheduler(0, SCHED_FIFO, &p);
+
+        int PoliticaNum = sched_getscheduler(0);
+
+        int Prioridad = getpriority(PRIO_PROCESS, 0);
+
+        char * Politica = "SCHED_RR";
+
+        if(PoliticaNum == 0)
+                Politica = "SCHED_OTHER";
+        else if(PoliticaNum > 0 && PoliticaNum < 100)
+                Politica = "SCHED_FIFO";
+
+        int PrioMax = sched_get_priority_max(PoliticaNum);
+        int PrioMin = sched_get_priority_min(PoliticaNum);
+
+        printf("Politica de planificacion: %s\nPrioridad: %i\n",Politica, Prioridad);
+        printf("Prioridad minima %i\nPrioridad maxima %i\n", PrioMin, PrioMax);
+
+        return 0;
+}
