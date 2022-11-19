@@ -60,8 +60,11 @@ int main(int argc, char** argv) {
                 MostrarAtributos();
         }
         else { //Padre
-                //sleep(3)
-                MostrarAtributos();
+                sleep(30);      //Para dejer Zombie
+                int status;
+                waitpid(pid, &status, 0);
+                printf("Acabo el zombie\n");
+
         }
 
         return 0;
