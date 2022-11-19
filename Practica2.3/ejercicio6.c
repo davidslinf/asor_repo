@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <sys/time.h>
 #include <sys/resource.h>
+#include <sys/wait.h>
 
 #define PATH_MAX 4096
 
