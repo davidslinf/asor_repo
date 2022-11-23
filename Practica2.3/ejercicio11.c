@@ -1,36 +1,35 @@
 #include <stdio.h>
 #include <string.h>
-#include <stdlib.h>
+#include <errno.h>
 #include <signal.h>
 
 #define SLEEP_SECS 5
 
-int main (int argc, char** argv) {
+int main(int argc, char **argv){
 
-        sigset_t InstrBloqueadas;
-        sigset_t Conjunto;
+        sigset_t InstBloquear;
+        sigset_t InstRecibir;
 
-        sigaddset(&InstrBloqueadas, SIGINT);
-        sigaddset(&InstrBloqueadas, SIGTSTP);
-        sigprocmask(SIG_BLOCK, &InstrBloqueadas, NULL);
+        sigemptyset(&InstBloquear);
+        sigemptyset(&InstRecibir);
+
+        sigaddset(&InstBloquear, SIGINT);
+        sigaddset(&InstBloquear, SIGTSTP);
+
+        sigprocmask(SIG_BLOCK, &InstBloquear, 0);
 
         sleep(SLEEP_SECS);
+         sigpending(&InstRecibir);
 
-        sigpending(&Conjunto);
-
-        if(sigismember(&Conjunto, SIGINT))
+        if(sigismember(&InstRecibir, SIGINT)){
                 printf("Señal SIGINT recibida\n");
-        else
-                printf("No se ha recibido la señal SIGINT\n");
-
-        if(sigismember(&Conjunto, SIGTSTP)) {
-                printf("Señal SIGTSTP recibida\n");
-                sigprocmask(SIG_UNBLOCK, &InstrBloqueadas, NULL);
         }
-        else
-                printf("No se ha recibido la señal SIGINT\n");
-
-
-        printf("El programa se ha reanudado\n");
+        if(sigismember(&InstRecibir, SIGTSTP)){
+                printf("Señal SIGTSTP recibida\n");
+                sigprocmask(SIG_UNBLOCK, &InstBloquear, 0);
+        }
+        printf("No se recibio ninguna señal\n");
 
         return 0;
+}
+
