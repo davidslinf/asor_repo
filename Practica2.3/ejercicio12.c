@@ -2,8 +2,8 @@
 #include <string.h>
 #include <signal.h>
 
-volatile int numSigint = 0;
-volatile int numSigtstp = 0;
+volatile static int numSigint = 0;
+volatile static int numSigtstp = 0;
 
 static void manejador(int signal) {
 
@@ -27,9 +27,7 @@ int main(int argc, char** argv) {
         sigaction(SIGTSTP, &act, NULL);
 
         sigset_t set;
-        sigfillset(&set);
-        sigdelset(&set, SIGINT);
-        sigdelset(&set, SIGTSTP);
+        sigemptyset(&set);
 
         while(numSigint + numSigtstp < 10) {
                 sigsuspend(&set);
