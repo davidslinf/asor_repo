@@ -5,7 +5,7 @@
 volatile static int numSigint = 0;
 volatile static int numSigtstp = 0;
 
-static void manejador(int signal) {
+void manejador(int signal) {
 
         if(signal == SIGINT) numSigint++;
         else if(signal == SIGTSTP) numSigtstp++;
