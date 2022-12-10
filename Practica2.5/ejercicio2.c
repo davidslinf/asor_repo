@@ -1,83 +1,118 @@
-#include <sys/socket.h>
-#include <netdb.h>
 #include <sys/types.h>
-#include <string.h>
-#include <errno.h>
+#include <sys/socket.h>
 #include <stdio.h>
+#include <errno.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <netdb.h>
 #include <stdlib.h>
+#include <string.h>
+#include <sys/time.h>
+#include <unistd.h>
 #include <time.h>
 
-int main(int argc, char * argv[]) {
+int main(int argc, char **argv){
+        struct addrinfo hints;
+        struct addrinfo *result;
+        char host[NI_MAXHOST];
+        char serv[NI_MAXSERV];
 
- struct addrinfo hints;
- memset(&hints, 0, sizeof(struct addrinfo));
- hints.ai_family = AF_UNSPEC;
- hints.ai_socktype = SOCK_DGRAM;
+        memset(&hints, 0, sizeof(struct addrinfo));
 
- struct addrinfo *res;
- int rc, sd;
- struct sockaddr_storage addr;
- socklen_t addrlen;
- char buf[2];
- char host[NI_MAXHOST];
- char serv[NI_MAXSERV];
+        hints.ai_flags = AI_PASSIVE;
+        hints.ai_family = AF_UNSPEC;
+        hints.ai_socktype = SOCK_DGRAM;
 
- time_t currTime;
- struct tm *currDate;
- char * s;
- const char * dateFormat = "%Y-%m-%d";
- const char * hourFormat = "%H:%M:%S %p";
+        int rc = getaddrinfo(argv[1], argv[2], &hints, &result);
 
+        if(rc == -1){
+                printf("Error en getaddrinfo: %s\n", gai_strerror(rc));
+                return -1;
+        }
 
- if(argc < 3){
-   perror("Se necesitan 2 argumentos, la dirección y el puerto\n");
-   return -1;
- }
+        int sd = socket(result->ai_family, result->ai_socktype, 0);
+        if(sd == -1){
+                perror("Error en la creacion del socket\n");
+                return -1;
+        }
 
- rc = getaddrinfo(argv[1], argv[2], &hints, &res);
+        int rc2 = bind(sd, result->ai_addr, result->ai_addrlen);
 
- sd = socket(res->ai_family, res->ai_socktype, 0);
+        if(rc2 == -1){
+                perror("Error en el bind\n");
+                return -1;
+        }
 
- bind(sd, res->ai_addr, res->ai_addrlen);
+        freeaddrinfo(result);
 
- while(1) {
-  addrlen = sizeof(addr);
-  ssize_t size  = recvfrom(sd, buf, 2, 0, (struct sockaddr *) &addr, &addrlen);
-  buf[size] = '\0';
-
-  getnameinfo((struct sockaddr *) &addr, addrlen, host, NI_MAXHOST,
-        serv, NI_MAXSERV, NI_NUMERICHOST|NI_NUMERICSERV);
-
-  printf("%d bytes de %s:%s\n", size, host, serv);
-
-  if(buf[0] == 'q'){
-    printf("Saliendo...\n");
-    freeaddrinfo(res);
-    close(sd);
-    exit(1);
-  }
-  else if(buf[0] == 'd') {
-    currTime = time(NULL);
-    currDate = localtime(&currTime);
-    s = malloc(11);
-    strftime(s, 11, dateFormat, currDate);
-    sendto(sd, s, 11, 0, (struct sockaddr *) &addr, addrlen);
-    memset(s,0,strlen(s));
-    free(s);
-  }
-  else if(buf[0] == 't') {
-    currTime = time(NULL);
-    currDate = localtime(&currTime);
-    s = malloc(12);
-    strftime(s, 12, hourFormat, currDate);
-    sendto(sd, s, 12, 0, (struct sockaddr *) &addr, addrlen);
-    memset(s,0,strlen(s));
-    free(s);
-  }
-  else{
-    printf("Comando %c no soportado\n", buf[0]);
-  }
- }
+        char buf[2];
+        struct sockaddr_storage cliente;
+        socklen_t clienteLen = sizeof(cliente);
  
- return 0;
+         while(buf[0] != 'q'){
+                ssize_t bytes = recvfrom(sd, buf, 2, 0,
+                        (struct sockaddr *) &cliente, &clienteLen);
+                buf[bytes] = '\0';
+
+                if(bytes == 0){
+                        printf("El cliente se ha desconectado\n");
+                        buf[0] = 'q';
+                }
+
+                int rc3 = getnameinfo((struct sockaddr *) &cliente, clienteLen, host, NI_MAXHOST,
+                        serv, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV);
+
+                if(rc3 == -1){
+                        perror("Error en el getnameinfo\n");
+                        return -1;
+                }
+
+                printf("Recibi %i bytes de %s:%s\n", bytes, host, serv);
+
+                if(buf[0] == 'd'){
+                        time_t t;
+                        struct tm *locTime;
+                        char bufTime[256];
+                        t = time(NULL);
+                        locTime = localtime(&t);
+                        strftime(bufTime, 256, "%Y-%m-%d", locTime);
+
+                        int writesize = sendto(sd, bufTime, strlen(bufTime), 0,
+                                (struct sockaddr *) &cliente,clienteLen);
+                        if(writesize == -1){
+                                perror("Error en el sendto\n");
+                                return -1;
+                        }
+
+                }
+                 else if(buf[0] == 't'){
+                        time_t t;
+                        struct tm *locTime;
+                        char bufTime[256];
+                        t = time(NULL);
+                        locTime = localtime(&t);
+                        strftime(bufTime, 256, "%r", locTime);
+
+                        int writesize = sendto(sd, bufTime, strlen(bufTime), 0,
+                                (struct sockaddr *) &cliente,clienteLen);
+                        if(writesize == -1){
+                                perror("Error en el sendto\n");
+                                return -1;
+                        }
+
+                }
+
+                else if(buf[0] == 'q'){
+                        printf("Comando de finalizacion recibido\n");
+                }
+                else    printf("Comando no soportado\n");
+
+        }
+
+        close(sd);
+
+        return 0;
 }
+
+                
+
