@@ -1,35 +1,39 @@
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 #include <sys/socket.h>
 #include <netdb.h>
 #include <sys/types.h>
 
-int main(int argc, char** args) {
+int main(int argc, char ** argv){
 
         struct addrinfo hints;
+        struct addrinfo *result;
+
         memset(&hints, 0, sizeof(struct addrinfo));
+        hints.ai_flags = AI_PASIVE;
         hints.ai_family = AF_UNSPEC;
-
-        struct addrinfo *res, *act;
-        char name[257];
-
-        if(argc != 2) {
-                perror("Se necesita pasar una direccion\n");
+        hints.ai_socktype = SOCK_STREAM;
+        int rc = getaddrinfo(argv[1], argv[2], &hints, &result);
+        if(rc == -1){
+                perror("Error en el addrinfo: %s\n", gai_strerror(rc));
                 return -1;
         }
-        if(getaddrinfo(argv[1], NULL, &hints, &res) == 0) {
-                for(act = res; act != NULL; act = act->ai_next ) {
-                        getnameinfo(act->ai_addr, act->ai_addrlen, name, sizeof(name), NULL, $
-                        printf("%s %i %i\n", name, act->ai_family, act->ai_socktype);
+
+        for(struct addrinfo *i = result, i != 0, i = i->ai_next){
+                char host[NI_MAXHOST];
+                char serv[NI_MAXSERV];
+
+                int rb = getnameinfo(i->ai_addr, i->ai_addrlen, host, NI_MAXHOST, serv, NI_MAXSERV,
+                        NI_NUMERICHOST | NI_NUMERICSERV);
+                if(rb == -1){
+                        perror("Error en el getnameinfo\n");
+                        return -1;
                 }
         }
-        else {
-                perror("Error en getaddrinfo()\n");
-                return -1;
-        }
+         printf("HOST: %s, SERV: %s\n", host, serv);
 
-        freeaddrinfo(res);
+        freeaddrinfo(result);
+
         return 0;
 }
-
-
