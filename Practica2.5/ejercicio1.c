@@ -8,10 +8,13 @@
 int main(int argc, char ** argv){
 
         struct addrinfo hints;
-        struct addrinfo *result;
+        struct addrinfo *result, *i;
+        char host[NI_MAXHOST];
+        char serv[NI_MAXSERV];
+
 
         memset(&hints, 0, sizeof(struct addrinfo));
-        hints.ai_flags = AI_PASIVE;
+        hints.ai_flags = AI_PASSIVE;
         hints.ai_family = AF_UNSPEC;
         hints.ai_socktype = SOCK_STREAM;
         int rc = getaddrinfo(argv[1], argv[2], &hints, &result);
@@ -20,10 +23,7 @@ int main(int argc, char ** argv){
                 return -1;
         }
 
-        for(struct addrinfo *i = result, i != 0, i = i->ai_next){
-                char host[NI_MAXHOST];
-                char serv[NI_MAXSERV];
-
+        for(i = result, i != 0, i = i->ai_next){
                 int rb = getnameinfo(i->ai_addr, i->ai_addrlen, host, NI_MAXHOST, serv, NI_MAXSERV,
                         NI_NUMERICHOST | NI_NUMERICSERV);
                 if(rb == -1){
