@@ -1,116 +1,140 @@
-#include <sys/socket.h>
-#include <netdb.h>
-#include <sys/types.h>
+#include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
 #include <time.h>
 #include <sys/select.h>
+#include <unistd.h>
 
-int main(int argc, char * argv[]) {
+int main(int argc, char ** argv){
 
- struct addrinfo hints;
- memset(&hints, 0, sizeof(struct addrinfo));
- hints.ai_family = AF_UNSPEC;
- hints.ai_socktype = SOCK_DGRAM;
+        struct addrinfo hints;
+        struct addrinfo *res;
 
- struct addrinfo *res;
- int rc, sd;
- struct sockaddr_storage addr;
- socklen_t addrlen;
- char buf[2];
- char host[NI_MAXHOST];
- char serv[NI_MAXSERV];
+        memset(&hints, 0, sizeof(struct addrinfo));
+        hints.ai_flags = AI_PASSIVE;
+        hints.ai_family = AF_UNSPEC;
+        hints.ai_socktype = SOCK_DGRAM;
 
- time_t currTime;
- struct tm *currDate;
- char * s;
- const char * dateFormat = "%Y-%m-%d";
- const char * hourFormat = "%H:%M:%S %p";
+        int rc = getaddrinfo(argv[1], argv[2], &hints, &res);
+        if(rc == -1){
+                printf("Error en el getaddrinfo: %s\n", gai_strerror(rc));
+                return -1;
+        }
+ 
+        int sd = socket(res->ai_family, res->ai_socktype, 0);
+        if(sd == -1){
+                perror("Error en el socket\n");
+                return -1;
+        }
 
- if(argc < 3){
-   perror("Se necesitan 2 argumentos, la dirección y el puerto\n");
-   return -1;
- }
+        int rc2 = bind(sd, res->ai_addr, res->ai_addrlen);
+        if(rc2 == -1){
+                perror("Error en el bind\n");
+                return -1;
+        }
 
- rc = getaddrinfo(argv[1], argv[2], &hints, &res);
+        freeaddrinfo(res);
 
- sd = socket(res->ai_family, res->ai_socktype, 0);
+        char buf[2];
+        struct sockaddr_storage cliente;
+        socklen_t clienteLen = sizeof(cliente);
 
- bind(sd, res->ai_addr, res->ai_addrlen);
+        char host[NI_MAXHOST];
+        char serv[NI_MAXSERV];
 
- fd_set read_fds;
+        fd_set set;
+ 
+        while(buf[0] != 'q'){
+                FD_ZERO(&set);
+                FD_SET(0, &set);
+                FD_SET(sd, &set);
 
- while(1) {
-  addrlen = sizeof(addr);
-  FD_ZERO(&read_fds);
-  FD_SET(sd, &read_fds);
-  FD_SET(0, &read_fds);
+                int rs = select(sd+1, &set, 0, 0, 0);
+                if(rs == -1){
+                        perror("Error en el select\n");
+                        return -1;
+                }
 
-  select(sd+1, &read_fds, NULL, NULL, NULL);
-  ssize_t size;
+                ssize_t bytes;
 
-  if(FD_ISSET(sd, &read_fds)){
-    size = recvfrom(sd, buf, 2, 0, (struct sockaddr *) &addr, &addrlen);
-    buf[size] = '\0';
-  }
-  else if(FD_ISSET(0, &read_fds)){
-    size  = read(0, buf, 2);
-  }
+                if(FD_ISSET(sd, &set)){
+                        bytes = recvfrom(sd, buf, 2, 0, (struct sockaddr *) &cliente, &clienteLen);
+                }
+                else if(FD_ISSET(0, &set)){
+                        bytes = read(0, buf, 2);
+                }
+                if(bytes == -1){
+                        perror("Error en el recvfrom\n");
+                        return -1;
+                }
+                if(bytes == 0){
+                        printf("El cliente se ha desconectado\n");
+                        buf[0] = 'q';
+                }
+                else buf[bytes] = '\0';
 
-  if(FD_ISSET(sd, &read_fds)){
-    getnameinfo((struct sockaddr *) &addr, addrlen, host, NI_MAXHOST,
-       serv, NI_MAXSERV, NI_NUMERICHOST|NI_NUMERICSERV);
+                if(FD_ISSET(sd, &set)){
+                        int rc3 = getnameinfo((struct sockaddr *) &cliente, clienteLen, host,
+                                NI_MAXHOST,serv, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV);
+                        if(rc3 == -1){
+                                perror("Error en el getnameinfo\n");
+                                return -1;
+                        }
 
-    printf("%d bytes de %s:%s\n", size, host, serv);
-  }
-  else if(FD_ISSET(0, &read_fds)){
-    printf("%d bytes de entrada estandar\n", size);
-  }
+                        printf("Recibidos %i bytes de %s:%s\n", bytes, host, serv);
+                }
 
-  if(buf[0] == 'q'){
-    printf("Saliendo...\n");
-    freeaddrinfo(res);
-    close(sd);
-    exit(1);
-  }
-  else if(buf[0] == 'd') {
-     currTime = time(NULL);
-     currDate = localtime(&currTime);
-     s = malloc(11);
-     strftime(s, 11, dateFormat, currDate);
-     
-    if(FD_ISSET(0, &read_fds)){
-       printf("%s\n", s);
-     }
-     else if(FD_ISSET(sd, &read_fds)){
-       sendto(sd, s, 11, 0, (struct sockaddr *) &addr, addrlen);
-     }
-    
-     memset(s,0,strlen(s));
-     free(s);
-  }
-  else if(buf[0] == 't') {
-     currTime = time(NULL);
-     currDate = localtime(&currTime);
-     s = malloc(12);
-     strftime(s, 12, hourFormat, currDate);
+                if(buf[0] == 't'){
+                        time_t t = time(NULL);
+                        char bufTime[256];
+                        struct tm *locTime;
+                        locTime = localtime(&t);
+                        strftime(bufTime, 256, "%H:%M:%S %p", locTime);
 
-     if(FD_ISSET(0, &read_fds)){
-       printf("%s\n",  s);
-     }
-     else if(FD_ISSET(sd, &read_fds)){
-       sendto(sd, s, 11, 0, (struct sockaddr *) &addr, addrlen);
-     }
+                        if(FD_ISSET(sd, &set)){
+                                ssize_t recibidos = sendto(sd, bufTime, strlen(bufTime), 0,
+                                        (struct sockaddr *) &cliente, clienteLen);
+                                if(recibidos == -1){
+                                        perror("Error en el sendto\n");
+                                        return -1;
+                                }
+                        }
+                        else if(FD_ISSET(0, &set)){
+                                printf("%s\n", bufTime);
+                        }
+                }
+                 else if(buf[0] == 'd'){
+                        time_t t = time(NULL);
+                        char bufTime[256];
+                        struct tm *locTime;
+                        locTime = localtime(&t);
+                        strftime(bufTime, 256, "%Y-%m-%d", locTime);
 
-     memset(s,0,strlen(s));
-     free(s);
-  }
-  else{
-    printf("Comando %c no soportado\n", buf[0]);
-  }
- }
+                        if(FD_ISSET(sd, &set)){
+                                ssize_t recibidos = sendto(sd, bufTime, strlen(bufTime), 0,
+                                        (struct sockaddr *) &cliente, clienteLen);
+                                if(recibidos == -1){
+                                        perror("Error en el sendto\n");
+                                        return -1;
+                                }
+                        }
+                        else if(FD_ISSET(0, &set)){
+                                printf("%s\n", bufTime);
+                        }
+                }
+                else if(buf[0] == 'q'){
+                        printf("Saliendo...\n");
 
- return 0;
+                }
+                else{
+                        printf("Comando no soportado\n");
+                }
+        }
+        close(sd);
+        return 0;
 }
+
+
